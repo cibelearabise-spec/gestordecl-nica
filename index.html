@@ -1,271 +1,255 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#1a2e26">
-<title>Gestor Odonto — Verdant Style</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Figtree:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gestor Odonto</title>
 <style>
-:root{
-  --bg:#f4f6f4;--card:#ffffff;--ink:#1a2e26;--muted:#5c6b63;--line:#d8e2dc;
-  --brand:#2d4a3e;--brand-d:#1b3027;--on-brand:#ffffff;--tint:#e3ede7;
-  --rose:#b84a4a;--rose-t:#fae8e8;--ok:#2e6b4f;--ok-t:#e2f2e9;--r:16px;
-  --tooth:#fff;--tooth-line:#cbd5e1;
-}
-*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{margin:0}
-body{font-family:'Figtree',system-ui,sans-serif;background:var(--bg);color:var(--ink);font-size:15px;line-height:1.45}
-h1,h2,h3{font-family:'Bricolage Grotesque',system-ui,sans-serif;margin:0;letter-spacing:-.01em}
-.wrap{max-width:1100px;margin:0 auto;padding:20px 16px 90px}
-.head{display:flex;align-items:center;gap:12px;margin-bottom:20px}
-.head h1{font-size:24px;font-weight:800;color:var(--brand-d)}
-.head h1.sm{font-size:20px}
-.sp{flex:1}
-.muted{color:var(--muted);font-size:13.5px}
-.card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:20px;margin-bottom:16px}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-@media(max-width:600px){.grid2{grid-template-columns:1fr}}
-.btn{background:var(--brand);color:var(--on-brand);padding:12px 20px;border-radius:14px;font-weight:700;border:0;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:8px;font-size:14px;width:100%}
-.btn.ghost{background:var(--tint);color:var(--brand-d)}
-.btn.sm{padding:8px 14px;font-size:13px;width:auto}
-.btn.danger{background:var(--rose);color:#fff}
-.btn.line{background:none;border:1px solid var(--line);color:var(--ink)}
-.row{display:flex;gap:10px}
-.mt{margin-top:14px}
-input,select,textarea{width:100%;padding:11px 14px;border:1px solid var(--line);border-radius:12px;font-family:inherit;font-size:14px;background:var(--card);color:var(--ink);margin-top:4px}
-input:focus,select:focus,textarea:focus{outline:2px solid var(--brand)}
-label.f{display:block;font-size:12px;font-weight:700;color:var(--muted);margin-top:12px}
-.icon{background:none;border:0;cursor:pointer;color:var(--ink);padding:6px;border-radius:10px;display:grid;place-items:center}
-.icon:hover{background:var(--tint)}
-
-/* Estatísticas e Atalhos */
-.stat{display:flex;flex-direction:column;gap:4px}
-.stat span{font-size:12px;font-weight:700;color:var(--muted)}
-.stat b{font-size:24px;font-family:'Bricolage Grotesque',sans-serif;color:var(--brand-d)}
-.pos{color:var(--ok)} .neg{color:var(--rose)}
-.qa{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-@media(max-width:600px){.qa{grid-template-columns:repeat(2,1fr)}}
-.qa button{display:flex;flex-direction:column;align-items:center;gap:8px;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px 8px;font-size:13px;font-weight:700;color:var(--ink);cursor:pointer;transition:.2s}
-.qa button:hover{background:var(--tint);transform:translateY(-2px)}
-.qa svg{color:var(--brand)}
-.sec{display:flex;align-items:center;justify-content:space-between;margin:24px 0 12px}
-.sec h3{font-size:18px}
-
-/* Listas e itens */
-.item{display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin-bottom:8px;cursor:pointer;transition:.15s}
-.item:hover{border-color:var(--brand)}
-.av{flex:none;width:40px;height:40px;border-radius:12px;background:var(--tint);color:var(--brand-d);display:grid;place-items:center;font-weight:800;font-size:13px}
-.item .t{font-weight:700}
-.item .s{color:var(--muted);font-size:13px}
-.item .r{text-align:right;flex:none;font-weight:700;font-size:13px}
-
-/* Agenda / Calendário */
-.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center;margin-top:10px}
-.cal-header{font-weight:700;font-size:12px;color:var(--muted);padding:6px 0}
-.cal-day{background:var(--card);border:1px solid var(--line);border-radius:10px;min-height:70px;padding:6px;font-size:13px;cursor:pointer;display:flex;flex-direction:column;align-items:flex-start}
-.cal-day.today{border-color:var(--brand);background:var(--tint)}
-.cal-day .num{font-weight:800;margin-bottom:4px}
-.cal-badge{background:var(--brand);color:#fff;font-size:10px;padding:2px 6px;border-radius:6px;margin-bottom:2px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-
-/* Navegação inferior */
-.nav{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--line);z-index:20;padding-bottom:env(safe-area-inset-bottom,0px)}
-.nav-in{display:flex;max-width:760px;margin:0 auto}
-.nav button{flex:1;background:none;border:0;color:var(--muted);padding:10px 2px 9px;font-size:11.5px;font-weight:700;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer}
-.nav button.on{color:var(--brand)}
-
-/* Modal */
-.sheet-bg{position:fixed;inset:0;background:rgba(6,20,25,.5);display:flex;align-items:flex-end;justify-content:center;z-index:50}
-.sheet{background:var(--card);width:100%;max-width:560px;max-height:92vh;overflow:auto;border-radius:22px 22px 0 0;padding:20px;animation:up .18s ease-out}
-@keyframes up{from{transform:translateY(24px);opacity:0}}
-@media (min-width:700px){.sheet-bg{align-items:center}.sheet{border-radius:22px}}
-#toast{position:fixed;left:50%;bottom:80px;transform:translate(-50%,20px);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:12px;font-weight:600;font-size:14px;opacity:0;pointer-events:none;transition:.2s;z-index:80;max-width:90%;text-align:center}
-#toast.show{opacity:1;transform:translate(-50%,0)}#toast.err{background:var(--rose);color:#fff}
-.empty{text-align:center;padding:30px;color:var(--muted);font-size:14px}
+  :root {
+    --brand: #0284c7;
+    --brand-dark: #0369a1;
+    --brand-light: #e0f2fe;
+    --bg: #f8fafc;
+    --surface: #ffffff;
+    --text: #0f172a;
+    --muted: #64748b;
+    --border: #e2e8f0;
+    --ok: #10b981;
+    --rose: #f43f5e;
+    --warn: #f59e0b;
+    --radius: 12px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; -webkit-tap-highlight-color: transparent; }
+  body { background: var(--bg); color: var(--text); padding-bottom: 72px; }
+  header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 10; }
+  header h1 { font-size: 18px; font-weight: 700; color: var(--brand); }
+  .container { max-width: 600px; margin: 0 auto; padding: 16px; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; margin-bottom: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
+  .btn { background: var(--brand); color: #fff; border: none; border-radius: var(--radius); padding: 10px 16px; font-weight: 600; font-size: 14px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none; }
+  .btn:hover { background: var(--brand-dark); }
+  .btn.ghost { background: transparent; color: var(--brand); border: 1px solid var(--border); }
+  .btn.sm { padding: 6px 12px; font-size: 12px; }
+  .btn.block { width: 100%; display: flex; }
+  .btn.danger { background: var(--rose); }
+  input, select, textarea { width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: var(--radius); font-size: 14px; background: var(--surface); color: var(--text); margin-top: 4px; margin-bottom: 12px; }
+  input:focus, select:focus, textarea:focus { outline: none; border-color: var(--brand); }
+  label.f { font-size: 12px; font-weight: 600; color: var(--muted); display: block; margin-bottom: 2px; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .row { display: flex; gap: 8px; align-items: center; }
+  .sp { flex: 1; }
+  .c { text-align: center; }
+  .r { text-align: right; }
+  .muted { color: var(--muted); font-size: 13px; }
+  .tag { display: inline-block; padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+  .tag.ok { background: #d1fae5; color: #065f46; }
+  .tag.rose { background: #ffe4e6; color: #9f1239; }
+  .tag.blue { background: var(--brand-light); color: var(--brand-dark); }
+  .tag.gray { background: #f1f5f9; color: #475569; }
+  nav.bot { position: fixed; bottom: 0; left: 0; right: 0; background: var(--surface); border-top: 1px solid var(--border); display: flex; justify-content: space-around; padding: 8px 0; z-index: 100; }
+  nav.bot button { background: none; border: none; display: flex; flex-direction: column; align-items: center; font-size: 11px; color: var(--muted); gap: 4px; cursor: pointer; flex: 1; }
+  nav.bot button.on { color: var(--brand); font-weight: 600; }
+  .modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; padding: 16px; z-index: 1000; }
+  .modal-box { background: var(--surface); width: 100%; max-width: 500px; border-radius: var(--radius); padding: 20px; max-height: 90vh; overflow-y: auto; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+  .item-list { display: flex; flex-direction: column; gap: 8px; }
+  .item-row { display: flex; align-items: center; justify-content: space-between; padding: 12px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); cursor: pointer; }
+  .item-row:hover { border-color: var(--brand); }
+  .toast { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); background: #0f172a; color: #fff; padding: 10px 20px; border-radius: 20px; font-size: 13px; z-index: 2000; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+  .hidden { display: none !important; }
 </style>
 </head>
 <body>
-<div id="app"></div>
-<div id="modal-root"></div>
-<div id="toast"></div>
+
+<header id="app-header">
+  <h1>Gestor Odonto</h1>
+</header>
+
+<div class="container" id="app-content">
+  <!-- O conteúdo renderizado via JS aparecerá aqui -->
+</div>
+
+<nav.bot id="app-nav" class="bot hidden">
+  <button onclick="nav('patients')" id="nav-patients">Pacientes</button>
+  <button onclick="nav('agenda')" id="nav-agenda">Agenda</button>
+  <button onclick="nav('fin')" id="nav-fin">Financeiro</button>
+  <button onclick="nav('more')" id="nav-more">Mais</button>
+</nav.bot>
+
+<div id="modal-container"></div>
+<div id="toast-container"></div>
+<div id="printdoc" class="hidden"></div>
 
 <script>
-/* ---------- utilidades e dados locais ---------- */
-const $=s=>document.querySelector(s);
-const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const uid=()=>'id'+Date.now().toString(36)+Math.random().toString(36).slice(2,10);
-const iso=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
-const today=()=>iso(new Date());
-const money=v=>Number(v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
-const MONTHS=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  // Variáveis globais do sistema
+  let S = { patients: [], plans: [], budgets: [], tx: [], appts: [], procs: [] };
+  let V = { screen: 'patients', pfilter: '', bfilter: 'todos', ftype: 'todas', period: 1, month: new Date().toISOString().slice(0,7), agendaDate: new Date().toISOString().slice(0,10) };
+  let LOCAL = true, sb = null, user = null;
+  let CLINIC = { name: '', dentist: '', cro: '', phone: '' };
 
-let S = {
-  patients: [
-    {id:'p1', name:'Ana Souza', phone:'11999998888', birth:'1992-05-14', notes:'Sensibilidade a frio'},
-    {id:'p2', name:'Carlos Lima', phone:'11988887777', birth:'1985-10-22', notes:'Usa aparelho'}
-  ],
-  appts: [
-    {id:'a1', patient_id:'p1', date:today(), time:'10:00', proc:'Limpeza', status:'agendado'},
-    {id:'a2', patient_id:'p2', date:today(), time:'14:30', proc:'Manutenção', status:'agendado'}
-  ],
-  tx: [
-    {id:'t1', type:'entrada', val:250, desc:'Consulta Ana', date:today(), status:'pago'},
-    {id:'t2', type:'despesa', val:120, desc:'Material de limpeza', date:today(), status:'pago'}
-  ],
-  budgets: []
-};
+  // Utilitários essenciais
+  const $ = s => document.querySelector(s);
+  const uid = () => Math.random().toString(36).substring(2, 9) + Date.now().toString(36);
+  const money = v => Number(v || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+  const fdate = d => d ? d.split('-').reverse().join('/') : '';
+  const today = () => new Date().toISOString().slice(0, 10);
+  const esc = s => String(s || '').replace(/"/g, '&quot;');
+  
+  function toast(msg) {
+    const t = document.createElement('div');
+    t.className = 'toast';
+    t.innerText = msg;
+    $('#toast-container').appendChild(t);
+    setTimeout(() => t.remove(), 3000);
+  }
 
-let V = { screen:'home', pid:null, agendaView:'month', agendaDate:today() };
+  function nav(screen, params = {}) {
+    V.screen = screen;
+    Object.assign(V, params);
+    render();
+  }
 
-function toast(m,err){
-  const t=$('#toast');t.textContent=m;t.className='show'+(err?' err':'');
-  setTimeout(()=>{t.className='';},2500);
-}
-function modal(html){$('#modal-root').innerHTML=`<div class="sheet-bg" onclick="if(event.target===this)closeModal()"><div class="sheet">${html}</div></div>`;}
-function closeModal(){$('#modal-root').innerHTML='';}
-function nav(s,o){Object.assign(V,o||{});V.screen=s;render();window.scrollTo(0,0);}
+  function render() {
+    let html = '';
+    const showNav = ['patients', 'agenda', 'fin', 'more'].includes(V.screen);
+    document.getElementById('app-nav').classList.toggle('hidden', !showNav);
 
-const IC={
-  home:'<path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v10h13V10"/>',
-  users:'<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6"/>',
-  calendar:'<rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/>',
-  wallet:'<rect x="2.5" y="6" width="19" height="13" rx="3"/><path d="M2.5 10h19"/>',
-  dots:'<circle cx="5" cy="12" r="1.7"/><circle cx="12" cy="12" r="1.7"/><circle cx="19" cy="12" r="1.7"/>',
-  plus:'<path d="M12 5v14M5 12h14"/>'
-};
-const ic=(n,s=20)=>`<svg viewBox="0 0 24 24" width="${s}" height="${s}" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${IC[n]||''}</svg>`;
+    if (V.screen === 'patients') html = scrPatients();
+    else if (V.screen === 'patient') html = scrPatient();
+    else if (V.screen === 'agenda') html = scrAgenda();
+    else if (V.screen === 'fin') html = scrFin();
+    else if (V.screen === 'budgets') html = scrBudgets();
+    else if (V.screen === 'budget') html = scrBudget();
+    else if (V.screen === 'reports') html = scrReports();
+    else if (V.screen === 'procs') html = scrProcs();
+    else if (V.screen === 'more') html = scrMore();
 
-/* ---------- Render principal ---------- */
-function render(){
-  const map={home:scrHome,patients:scrPatients,agenda:scrAgenda,fin:scrFin,more:scrMore};
-  const body=(map[V.screen]||scrHome)();
-  const items=[['home','Início','home'],['patients','Pacientes','users'],['agenda','Agenda','calendar'],['fin','Financeiro','wallet'],['more','Mais','dots']];
-  $('#app').innerHTML=`<main class="wrap">${body}</main><nav class="nav"><div class="nav-in">${items.map(([k,l,i])=>`<button class="${V.screen===k?'on':''}" onclick="nav('${k}')">${ic(i,22)}${l}</button>`).join('')}</div></nav>`;
-}
+    $('#app-content').innerHTML = html;
+  }
 
-/* ---------- Telas ---------- */
-function scrHome(){
-  const hoje = S.appts.filter(a=>a.date===today());
-  return `
-    <div class="head">
-      <div><div class="muted">Bem-vindo(a)</div><h1>Gestor Odonto</h1></div>
-    </div>
-    <div class="grid2">
-      <div class="card stat"><span>Consultas hoje</span><b>${hoje.length}</b></div>
-      <div class="card stat"><span>Pacientes</span><b>${S.patients.length}</b></div>
-    </div>
-    <div class="sec"><h3>Atalhos</h3></div>
-    <div class="qa">
-      <button onclick="openPatientModal()">${ic('users',24)}Novo paciente</button>
-      <button onclick="openBudgetModal()">${ic('plus',24)}Novo orçamento</button>
-      <button onclick="openApptModal()">${ic('calendar',24)}Agendar</button>
-      <button onclick="openTxModal('entrada')">${ic('wallet',24)}Nova entrada</button>
-      <button onclick="openTxModal('despesa')">${ic('wallet',24)}Nova despesa</button>
-      <button onclick="nav('agenda')">${ic('calendar',24)}Ver Agenda</button>
-    </div>
-    <div class="sec"><h3>Consultas de Hoje</h3></div>
-    ${hoje.length ? hoje.map(a=>{
-      const p = S.patients.find(x=>x.id===a.patient_id);
-      return `<div class="item"><div class="av">${a.time}</div><div style="flex:1"><div class="t">${esc(p?p.name:'Paciente')}</div><div class="s">${esc(a.proc)}</div></div></div>`;
-    }).join('') : '<div class="empty">Nenhuma consulta hoje.</div>'}
-  `;
-}
+  // Funções de Inicialização e Dados Locais
+  function loadLocal() {
+    try {
+      const data = localStorage.getItem('gestor_odonto_data');
+      if (data) S = JSON.parse(data);
+    } catch(e) {}
+  }
+  
+  function persistLocal() {
+    try {
+      localStorage.setItem('gestor_odonto_data', JSON.stringify(S));
+    } catch(e) {}
+  }
 
-function scrPatients(){
-  return `
-    <div class="head"><h1>Pacientes</h1><button class="btn sm" onclick="openPatientModal()">${ic('plus',16)} Novo</button></div>
-    ${S.patients.map(p=>`<div class="item" onclick="alert('${esc(p.name)}')"><div class="av">${p.name[0]}</div><div style="flex:1"><div class="t">${esc(p.name)}</div><div class="s">${esc(p.phone||'Sem telefone')}</div></div></div>`).join('')}
-  `;
-}
+  function loadClinic() {
+    try {
+      const c = localStorage.getItem('gestor_odonto_clinic');
+      if (c) CLINIC = JSON.parse(c);
+    } catch(e) {}
+  }
 
-/* Agenda com Calendário Mensal e Semanal */
-function scrAgenda(){
-  const isMonth = V.agendaView === 'month';
-  return `
-    <div class="head">
-      <h1>Agenda</h1>
-      <div class="row" style="gap:6px">
-        <button class="btn sm ${isMonth?'':'ghost'}" onclick="V.agendaView='month';render()">Mensal</button>
-        <button class="btn sm ${!isMonth?'':'ghost'}" onclick="V.agendaView='week';render()">Semanal</button>
-        <button class="btn sm" onclick="openApptModal()">${ic('plus',16)} Novo</button>
-      </div>
-    </div>
-    <div class="card">
-      <div style="font-weight:700;margin-bottom:10px">${isMonth ? 'Calendário Mensal' : 'Visão Semanal'} — Todos os agendamentos</div>
-      ${isMonth ? renderMonthCalendar() : renderWeekCalendar()}
-    </div>
-  `;
-}
+  async function seedProcsIfEmpty() {
+    if (!S.procs.length) {
+      S.procs = [
+        { id: uid(), name: 'Profilaxia (limpeza)', value: 180 },
+        { id: uid(), name: 'Restauração de resina - 1 face', value: 200 },
+        { id: uid(), name: 'Tratamento de canal (endodontia)', value: 900 }
+      ];
+      persistLocal();
+    }
+  }
 
-function renderMonthCalendar(){
-  const daysInMonth = 30; // Exemplo simplificado do mês atual
-  let html = `<div class="cal-grid">`;
-  ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'].forEach(d=> html+=`<div class="cal-header">${d}</div>`);
-  for(let i=1; i<=31; i++){
-    const dStr = `2026-03-${String(i).padStart(2,'0')}`;
-    const dayAppts = S.appts.filter(a=>a.date===dStr);
-    html+=`<div class="cal-day ${dStr===today()?'today':''}" onclick="openApptModal('${dStr}')">
-      <div class="num">${i}</div>
-      ${dayAppts.map(a=>`<div class="cal-badge">${a.time}</div>`).join('')}
+  // Telas básicas e componentes estruturais
+  function head(title, backAction, rightAction = '') {
+    return `<div class="row" style="margin-bottom:16px;">
+      ${backAction ? `<button class="btn ghost sm" onclick="${backAction}">Voltar</button>` : ''}
+      <h2 class="sp">${title}</h2>
+      ${rightAction}
     </div>`;
   }
-  html+=`</div>`;
-  return html;
-}
 
-function renderWeekCalendar(){
-  let html = `<div style="display:flex;flex-direction:column;gap:8px">`;
-  for(let i=0; i<7; i++){
-    const dStr = `2026-03-${String(15+i).padStart(2,'0')}`;
-    const dayAppts = S.appts.filter(a=>a.date===dStr);
-    html+=`<div class="item" style="justify-content:space-between">
-      <div><b>Dia ${15+i}/03</b><div class="s">${dayAppts.length ? dayAppts.map(a=>a.time+' - '+a.proc).join(', ') : 'Nenhum agendamento'}</div></div>
-      <button class="btn sm ghost" onclick="openApptModal('${dStr}')">+ Agendar</button>
+  function empty(msg) {
+    return `<div class="card c" style="padding:32px 16px;"><p class="muted">${msg}</p></div>`;
+  }
+
+  function item(opt) {
+    return `<div class="item-row" onclick="${opt.click || ''}">
+      <div><b>${opt.t}</b><br><small class="muted">${opt.s || ''}</small></div>
+      <div class="r">${opt.r || ''}</div>
     </div>`;
   }
-  html+=`</div>`;
-  return html;
-}
 
-function scrFin(){
-  return `<div class="head"><h1>Financeiro</h1></div><div class="card">Controle de entradas e despesas ativado. Saldo atual: <b class="pos">R$ 130,00</b></div>`;
-}
-function scrMore(){
-  return `<div class="head"><h1>Mais Opções</h1></div><div class="card"><button class="btn ghost" onclick="alert('Configurações da Clínica')">Configurações</button></div>`;
-}
+  // Telas Principais integradas
+  function scrPatients() {
+    const l = S.patients.filter(p => p.name.toLowerCase().includes((V.pfilter || '').toLowerCase()));
+    return head('Pacientes', null, `<button class="btn sm" onclick="patientForm()">+ Novo</button>`) +
+      `<input placeholder="Pesquisar paciente..." value="${esc(V.pfilter)}" oninput="V.pfilter=this.value;render()">` +
+      `<div class="item-list">${l.length ? l.map(p => item({ t: esc(p.name), s: p.phone ? 'Tel: ' + p.phone : '', click: `nav('patient',{pid:'${p.id}'})` })).join('') : empty('Nenhum paciente encontrado.')}</div>`;
+  }
 
-/* Modais de Ação */
-function openPatientModal(){
-  modal(`<h2>Novo Paciente</h2>
-    <label class="f">Nome</label><input id="m_name">
-    <label class="f">Telefone</label><input id="m_phone">
-    <div class="row mt"><button class="btn line" onclick="closeModal()">Cancelar</button><button class="btn" onclick="savePatientModal()">Salvar</button></div>`);
-}
-function savePatientModal(){
-  const name=$('#m_name').value;
-  if(!name)return toast('Informe o nome',true);
-  S.patients.push({id:uid(), name, phone:$('#m_phone').value});
-  closeModal(); toast('Paciente salvo!'); render();
-}
+  function scrPatient() {
+    const p = S.patients.find(x => x.id === V.pid);
+    if (!p) return empty('Paciente não encontrado.');
+    return head('Detalhes do Paciente', "nav('patients')") +
+      `<div class="card"><h3>${esc(p.name)}</h3><p class="muted">Telefone: ${esc(p.phone || 'Não informado')}</p></div>` +
+      `<button class="btn ghost block" onclick="nav('patients')">Voltar à lista</button>`;
+  }
 
-function openApptModal(date){
-  modal(`<h2>Novo Agendamento</h2>
-    <label class="f">Data</label><input type="date" id="m_date" value="${date||today()}">
-    <label class="f">Horário</label><input type="time" id="m_time" value="09:00">
-    <label class="f">Procedimento</label><input id="m_proc" value="Consulta">
-    <div class="row mt"><button class="btn line" onclick="closeModal()">Cancelar</button><button class="btn" onclick="saveApptModal()">Agendar</button></div>`);
-}
-function saveApptModal(){
-  S.appts.push({id:uid(), patient_id:S.patients[0]?.id||'p1', date:$('#m_date').value, time:$('#m_time').value, proc:$('#m_proc').value});
-  closeModal(); toast('Agendado com sucesso!'); render();
-}
+  function patientForm() {
+    const name = prompt('Nome do paciente:');
+    if (!name) return;
+    const p = { id: uid(), name, phone: '', birth: '', odonto: {} };
+    S.patients.push(p);
+    persistLocal();
+    nav('patient', { pid: p.id });
+  }
 
-function openBudgetModal(){ modal(`<h2>Novo Orçamento</h2><p class="muted">Módulo de orçamento rápido.</p><button class="btn mt" onclick="closeModal()">Fechar</button>`); }
-function openTxModal(type){ modal(`<h2>Nova ${type}</h2><label class="f">Valor (R$)</label><input type="number" id="m_val"><div class="row mt"><button class="btn line" onclick="closeModal()">Cancelar</button><button class="btn" onclick="closeModal();toast('Salvo!');">Salvar</button></div>`); }
+  function scrAgenda() {
+    return head('Agenda') + `<div class="card c"><p class="muted">Agenda integrada para o dia ${V.agendaDate}</p></div>`;
+  }
 
-render();
+  function scrFin() {
+    return head('Financeiro') + `<div class="card c"><p class="muted">Gestão financeira e fluxo de caixa.</p></div>`;
+  }
+
+  function scrBudgets() {
+    return head('Orçamentos', "nav('more')") + `<div class="card c"><p class="muted">Nenhum orçamento cadastrado.</p></div>`;
+  }
+
+  function scrBudget() { return ''; }
+  function scrReports() { return ''; }
+  function scrProcs() { return ''; }
+
+  function scrMore() {
+    return head('Mais') + 
+      `<button class="btn ghost block" onclick="seedDemo()" style="margin-bottom:8px;">Carregar dados de exemplo</button>` +
+      `<button class="btn danger block" onclick="wipeLocal()">Apagar todos os dados</button>`;
+  }
+
+  async function seedDemo() {
+    if (!confirm('Adicionar pacientes e lançamentos de exemplo?')) return;
+    const p1 = uid(), p2 = uid();
+    S.patients = [
+      { id: p1, name: 'Ana Souza', phone: '11999887766', birth: '1992-05-14', odonto: {} },
+      { id: p2, name: 'Carlos Eduardo', phone: '11988776655', birth: '1985-11-20', odonto: {} }
+    ];
+    persistLocal();
+    render();
+    toast('Dados de exemplo adicionados com sucesso!');
+  }
+
+  function wipeLocal() {
+    if (!confirm('Apagar todos os dados salvos neste aparelho? Esta ação não pode ser desfeita.')) return;
+    S = { patients: [], plans: [], budgets: [], tx: [], appts: [], procs: [] };
+    persistLocal();
+    seedProcsIfEmpty().then(() => { render(); toast('Dados apagados.'); });
+  }
+
+  // Inicialização do app
+  (async function boot() {
+    loadLocal();
+    loadClinic();
+    await seedProcsIfEmpty();
+    render();
+  })();
 </script>
 </body>
 </html>
