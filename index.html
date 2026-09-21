@@ -1,454 +1,85 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Gestor Odonto</title>
 <style>
-  :root {
-    --brand: #0284c7;
-    --brand-dark: #0369a1;
-    --brand-light: #e0f2fe;
-    --bg: #f8fafc;
-    --surface: #ffffff;
-    --text: #0f172a;
-    --muted: #64748b;
-    --border: #e2e8f0;
-    --ok: #10b981;
-    --rose: #f43f5e;
-    --radius: 12px;
+  /* Novos estilos para o layout Landscape inspirado na referência */
+  .landscape-header { background: #0f172a; color: #fff; padding: 12px 20px; display: flex; align-items: center; justify-content: space-between; border-radius: var(--radius); margin-bottom: 12px; }
+  .landscape-nav-links { display: flex; gap: 16px; font-size: 13px; font-weight: 500; }
+  .landscape-nav-links span { cursor: pointer; opacity: 0.8; }
+  .landscape-nav-links span:hover { opacity: 1; }
+
+  .hero-landscape { position: relative; width: 100%; height: 260px; border-radius: var(--radius); overflow: hidden; margin-bottom: 16px; background-size: cover; background-position: center; display: flex; flex-direction: column; justify-content: flex-end; padding: 20px; color: #fff; }
+  .hero-landscape::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.7), transparent); z-index: 1; }
+  .hero-landscape * { position: relative; z-index: 2; }
+
+  .middle-landscape-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; align-items: stretch; }
+  .middle-left-img { width: 100%; height: 100%; min-height: 140px; object-fit: cover; border-radius: var(--radius); border: 1px solid var(--border); }
+  .middle-right-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; display: flex; flex-direction: column; justify-content: center; }
+
+  .bottom-4grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 24px; }
+  .bottom-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 10px; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 6px; cursor: pointer; transition: 0.2s; }
+  .bottom-card:hover { border-color: var(--brand); transform: translateY(-2px); }
+  .bottom-card img { width: 100%; height: 60px; object-fit: cover; border-radius: 6px; }
+  .bottom-card span { font-size: 11px; font-weight: 600; color: var(--text); line-height: 1.2; }
+
+  @media(max-width: 600px) {
+    .bottom-4grid { grid-template-columns: repeat(2, 1fr); }
+    .middle-landscape-grid { grid-template-columns: 1fr; }
   }
-  * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; -webkit-tap-highlight-color: transparent; }
-  body { background: var(--bg); color: var(--text); padding-bottom: 72px; }
-  header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 10; }
-  header h1 { font-size: 18px; font-weight: 700; color: var(--brand); }
-  .container { max-width: 600px; margin: 0 auto; padding: 16px; }
-  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; margin-bottom: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
-  .btn { background: var(--brand); color: #fff; border: none; border-radius: var(--radius); padding: 10px 16px; font-weight: 600; font-size: 14px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none; }
-  .btn:hover { background: var(--brand-dark); }
-  .btn.ghost { background: transparent; color: var(--brand); border: 1px solid var(--border); }
-  .btn.sm { padding: 6px 12px; font-size: 12px; }
-  .btn.block { width: 100%; display: flex; }
-  .btn.danger { background: var(--rose); color: #fff; }
-  .btn.line { background: transparent; border: 1px solid var(--border); color: var(--text); }
-  input, select, textarea { width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: var(--radius); font-size: 14px; background: var(--surface); color: var(--text); margin-top: 4px; margin-bottom: 12px; }
-  input:focus, select:focus, textarea:focus { outline: none; border-color: var(--brand); }
-  label.f { font-size: 12px; font-weight: 600; color: var(--muted); display: block; margin-bottom: 2px; margin-top: 10px; }
-  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-  .row { display: flex; gap: 8px; align-items: center; }
-  .sp { flex: 1; }
-  .c { text-align: center; }
-  .r { text-align: right; }
-  .muted { color: var(--muted); font-size: 13px; }
-  nav.bot { position: fixed; bottom: 0; left: 0; right: 0; background: var(--surface); border-top: 1px solid var(--border); display: flex; justify-content: space-around; padding: 8px 0; z-index: 100; }
-  nav.bot button { background: none; border: none; display: flex; flex-direction: column; align-items: center; font-size: 11px; color: var(--muted); gap: 4px; cursor: pointer; flex: 1; }
-  nav.bot button.on { color: var(--brand); font-weight: 600; }
-  .modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; padding: 16px; z-index: 1000; }
-  .modal-box { background: var(--surface); width: 100%; max-width: 500px; border-radius: var(--radius); padding: 20px; max-height: 90vh; overflow-y: auto; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
-  .toast { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); background: #0f172a; color: #fff; padding: 10px 20px; border-radius: 20px; font-size: 13px; z-index: 2000; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
-  .hidden { display: none !important; }
-  .chips { display: flex; gap: 6px; overflow-x: auto; margin-bottom: 12px; padding-bottom: 4px; }
-  .chip { background: var(--surface); border: 1px solid var(--border); padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; color: var(--muted); cursor: pointer; white-space: nowrap; }
-  .chip.on { background: var(--brand); color: #fff; border-color: var(--brand); }
-  .menu { display: flex; align-items: center; width: 100%; padding: 14px 16px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 8px; cursor: pointer; text-align: left; gap: 12px; color: var(--text); }
-  .menu:hover { border-color: var(--brand); }
-  .mi { width: 24px; color: var(--brand); display: flex; align-items: center; justify-content: center; }
-  .stat { display: flex; flex-direction: column; }
-  .stat span { font-size: 12px; color: var(--muted); font-weight: 600; }
-  .stat b { font-size: 20px; color: var(--text); margin-top: 2px; }
-  .pos { color: var(--ok); }
-  .neg { color: var(--rose); }
-
-  /* Estilos visuais personalizados para a página inicial com imagens */
-  .hero-banner { width: 100%; height: 160px; object-fit: cover; border-radius: var(--radius); margin-bottom: 12px; }
-  .mid-section { display: flex; align-items: center; gap: 12px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px; margin-bottom: 16px; }
-  .mid-section img { width: 60px; height: 60px; object-fit: cover; border-radius: 8px; flex-shrink: 0; }
-  .shortcuts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
-  .shortcut-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 8px; cursor: pointer; transition: 0.2s; }
-  .shortcut-card:hover { border-color: var(--brand); transform: translateY(-2px); }
-  .shortcut-card img { width: 40px; height: 40px; object-fit: cover; border-radius: 6px; }
-  .shortcut-card span { font-size: 12px; font-weight: 600; color: var(--text); }
 </style>
-</head>
-<body>
-
-<header id="app-header">
-  <h1>Gestor Odonto</h1>
-</header>
-
-<div class="container" id="app-content"></div>
-
-<nav class="bot hidden" id="app-nav">
-  <button onclick="nav('home')" id="nav-home">Início</button>
-  <button onclick="nav('patients')" id="nav-patients">Pacientes</button>
-  <button onclick="nav('agenda')" id="nav-agenda">Agenda</button>
-  <button onclick="nav('fin')" id="nav-fin">Financeiro</button>
-  <button onclick="nav('more')" id="nav-more">Mais</button>
-</nav>
-
-<div id="modal-container"></div>
-<div id="toast-container"></div>
 
 <script>
-let S = { patients: [], plans: [], budgets: [], tx: [], appts: [], procs: [] };
-let V = { screen: 'home', pfilter: '', agendaDate: new Date().toISOString().slice(0,10) };
-let CLINIC = { name: '', dentist: '', cro: '', phone: '' };
-
-const $ = s => document.querySelector(s);
-const uid = () => Math.random().toString(36).substring(2, 9) + Date.now().toString(36);
-const money = v => Number(v || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-const fdate = d => d ? d.split('-').reverse().join('/') : '';
-const today = () => new Date().toISOString().slice(0, 10);
-const esc = s => String(s || '').replace(/"/g, '&quot;');
-const sum = arr => arr.reduce((a, b) => a + Number(b.value || 0), 0);
-
-function toast(msg, err) {
-  const t = document.createElement('div');
-  t.className = 'toast';
-  if (err) t.style.background = 'var(--rose)';
-  t.innerText = msg;
-  $('#toast-container').appendChild(t);
-  setTimeout(() => t.remove(), 3000);
-}
-
-function nav(screen, params = {}) {
-  V.screen = screen;
-  Object.assign(V, params);
-  render();
-}
-
-function render() {
-  let html = '';
-  const showNav = ['home', 'patients', 'agenda', 'fin', 'more'].includes(V.screen);
-  document.getElementById('app-nav').classList.toggle('hidden', !showNav);
-  
-  document.querySelectorAll('nav.bot button').forEach(b => b.classList.remove('on'));
-  const activeBtn = document.getElementById('nav-' + V.screen);
-  if (activeBtn) activeBtn.classList.add('on');
-
-  if (V.screen === 'home') html = scrHome();
-  else if (V.screen === 'patients') html = scrPatients();
-  else if (V.screen === 'patient') html = scrPatient();
-  else if (V.screen === 'agenda') html = scrAgenda();
-  else if (V.screen === 'fin') html = scrFin();
-  else if (V.screen === 'budgets') html = scrBudgets();
-  else if (V.screen === 'budget') html = scrBudget();
-  else if (V.screen === 'reports') html = scrReports();
-  else if (V.screen === 'procs') html = scrProcs();
-  else if (V.screen === 'more') html = scrMore();
-
-  $('#app-content').innerHTML = html;
-}
-
-function head(title, backAction, rightAction = '') {
-  return `<div class="row" style="margin-bottom:16px;">
-    ${backAction ? `<button class="btn ghost sm" onclick="${backAction}">Voltar</button>` : ''}
-    <h2 class="sp">${title}</h2>
-    ${rightAction}
-  </div>`;
-}
-
-function empty(msg) {
-  return `<div class="card c" style="padding:32px 16px;"><p class="muted">${msg}</p></div>`;
-}
-
-function item(opt) {
-  return `<div onclick="${opt.click || ''}" style="display:flex; align-items:center; justify-content:space-between; padding:12px; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); margin-bottom:8px; cursor:pointer;">
-    <div style="display:flex; align-items:center; gap:12px;">
-      ${opt.av ? `<div style="background:var(--brand-light); color:var(--brand); width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:600; font-size:14px;">${opt.av}</div>` : ''}
-      <div><b>${opt.t}</b><br><small class="muted">${opt.s || ''}</small></div>
-    </div>
-    <div class="r">${opt.r || ''}</div>
-  </div>`;
-}
-
-function modal(html) {
-  $('#modal-container').innerHTML = `<div class="modal-bg" onclick="if(event.target===this)closeModal()"><div class="modal-box">${html}</div></div>`;
-}
-function closeModal() { $('#modal-container').innerHTML = ''; }
-
-function loadLocal() {
-  try {
-    const data = localStorage.getItem('gestor_odonto_data');
-    if (data) S = JSON.parse(data);
-  } catch(e) {}
-}
-function persistLocal() {
-  try { localStorage.setItem('gestor_odonto_data', JSON.stringify(S)); } catch(e) {}
-}
-function loadClinic() {
-  try {
-    const c = localStorage.getItem('gestor_odonto_clinic');
-    if (c) CLINIC = JSON.parse(c);
-  } catch(e) {}
-}
-
-async function seedProcsIfEmpty() {
-  if (!S.procs.length) {
-    S.procs = [
-      { id: uid(), name: 'Profilaxia (limpeza)', value: 180 },
-      { id: uid(), name: 'Restauração de resina - 1 face', value: 200 },
-      { id: uid(), name: 'Tratamento de canal (endodontia)', value: 900 }
-    ];
-    persistLocal();
-  }
-}
-
-// Tela Inicial / Dashboard customizada com as imagens
+// Substituição da função scrHome para seguir o layout landscape com 4 figuras embaixo
 function scrHome() {
   const totalPacientes = S.patients.length;
   const consultasHoje = S.appts.filter(a => a.date === today()).length;
   const saldo = sum(S.tx.filter(x => x.type === 'entrada' && x.status === 'pago')) - sum(S.tx.filter(x => x.type === 'despesa' && x.status === 'pago'));
 
-  return head(esc(CLINIC.name || 'Gestor Odonto')) +
-    // Imagem principal (Hero Section) com capa.png
-    `<img src="capa.png" class="hero-banner" alt="Capa da Clínica" onerror="this.style.display='none'">` +
-    
-    // Posição do meio no canto esquerdo com agendamento.png
-    `<div class="mid-section" onclick="nav('agenda')">
-      <img src="agendamento.png" alt="Agendamento" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'40\\' height=\\'40\\'><rect width=\\'100%\\' height=\\'100%\\' fill=\\'%23e0f2fe\\'/></svg>'">
-      <div class="sp">
-        <span style="font-size:12px; color:var(--muted); font-weight:600;">Consultas de Hoje</span>
-        <h3 style="font-size:18px; color:var(--text);">${consultasHoje} agendada(s)</h3>
+  return `
+    <div class="landscape-header">
+      <b>Gestor Odonto</b>
+      <div class="landscape-nav-links">
+        <span onclick="nav('home')">Início</span>
+        <span onclick="nav('patients')">Pacientes</span>
+        <span onclick="nav('agenda')">Agenda</span>
+        <span onclick="nav('fin')">Financeiro</span>
       </div>
-      <button class="btn sm ghost">Ver</button>
-    </div>` +
+    </div>
 
-    // Indicadores rápidos
-    `<div class="grid2" style="margin-bottom:12px;">
-      <div class="card stat" onclick="nav('patients')"><span>Pacientes</span><b>${totalPacientes}</b></div>
-      <div class="card stat" onclick="nav('fin')"><span>Saldo em Caixa</span><b class="${saldo>=0?'pos':'neg'}">${money(saldo)}</b></div>
-    </div>` +
+    <!-- Imagem Principal (Hero Section) com capa.png -->
+    <div class="hero-landscape" style="background-image: url('capa.png');">
+      <span style="font-size: 12px; letter-spacing: 1px; text-transform: uppercase; opacity: 0.9;">Gestão Odontológica Inteligente</span>
+      <h2 style="font-size: 22px; font-weight: 700; margin-top: 4px;">Seu consultório organizado e moderno</h2>
+    </div>
 
-    // Bloco inferior com os Atalhos e distribuição das 4 figuras
-    `<h3 style="margin-bottom:8px; font-size:15px;">Atalhos</h3>
-     <div class="shortcuts-grid">
-       <div class="shortcut-card" onclick="patientForm()">
-         <img src="sorriso1.png" alt="Novo Paciente" onerror="this.style.display='none'">
-         <span>Novo paciente</span>
-       </div>
-       <div class="shortcut-card" onclick="newBudget()">
-         <img src="tratamento.png" alt="Novo Orçamento" onerror="this.style.display='none'">
-         <span>Novo orçamento</span>
-       </div>
-       <div class="shortcut-card" onclick="nav('agenda')">
-         <img src="agendamento.png" alt="Agendar" onerror="this.style.display='none'">
-         <span>Agendar</span>
-       </div>
-       <div class="shortcut-card" onclick="txForm('entrada')">
-         <img src="financeiro.png" alt="Nova Entrada" onerror="this.style.display='none'">
-         <span>Nova entrada</span>
-       </div>
-       <div class="shortcut-card" onclick="txForm('despesa')">
-         <img src="financeiro.png" alt="Nova Despesa" onerror="this.style.display='none'">
-         <span>Nova despesa</span>
-       </div>
-       <div class="shortcut-card" onclick="nav('reports')">
-         <img src="estetica.png" alt="Relatórios" onerror="this.style.display='none'">
-         <span>Relatórios</span>
-       </div>
-     </div>`;
-}
+    <!-- Seção Intermediária: imagem agendamento.png no canto esquerdo + bloco ao lado -->
+    <div class="middle-landscape-grid">
+      <img src="agendamento.png" class="middle-left-img" alt="Agendamento" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'100%\\' height=\\'100%\\' fill=\\'%23e0f2fe\\'/></svg>'">
+      <div class="middle-right-card">
+        <span style="font-size: 12px; color: var(--muted); font-weight: 600;">Resumo do Dia</span>
+        <h3 style="font-size: 16px; margin: 4px 0 8px 0;">${consultasHoje} consulta(s) hoje</h3>
+        <p class="muted" style="font-size: 12px; margin-bottom: 8px;">Pacientes cadastrados: <b>${totalPacientes}</b></p>
+        <button class="btn sm" onclick="nav('agenda')">Ver Agenda</button>
+      </div>
+    </div>
 
-function scrPatients() {
-  const l = S.patients.filter(p => p.name.toLowerCase().includes((V.pfilter || '').toLowerCase()));
-  return head('Pacientes', null, `<button class="btn sm" onclick="patientForm()">+ Novo</button>`) +
-    `<input placeholder="Pesquisar paciente..." value="${esc(V.pfilter)}" oninput="V.pfilter=this.value;render()">` +
-    (l.length ? l.map(p => item({ av: p.name.slice(0,2).toUpperCase(), t: esc(p.name), s: p.phone ? 'Tel: ' + p.phone : '', click: `nav('patient',{pid:'${p.id}'})` })).join('') : empty('Nenhum paciente encontrado.'));
+    <!-- Bloco Inferior: exatamente as 4 figuras em linha (Atalhos) -->
+    <h3 style="margin-bottom: 10px; font-size: 14px; font-weight: 700;">Atalhos Rápidos</h3>
+    <div class="bottom-4grid">
+      <div class="bottom-card" onclick="patientForm()">
+        <img src="sorriso1.png" alt="Novo Paciente" onerror="this.style.display='none'">
+        <span>Novo paciente</span>
+      </div>
+      <div class="bottom-card" onclick="newBudget()">
+        <img src="tratamento.png" alt="Novo Orçamento" onerror="this.style.display='none'">
+        <span>Novo orçamento</span>
+      </div>
+      <div class="bottom-card" onclick="txForm('entrada')">
+        <img src="financeiro.png" alt="Nova Entrada" onerror="this.style.display='none'">
+        <span>Nova entrada</span>
+      </div>
+      <div class="bottom-card" onclick="nav('reports')">
+        <img src="estetica.png" alt="Relatórios" onerror="this.style.display='none'">
+        <span>Relatórios</span>
+      </div>
+    </div>
+  `;
 }
-
-function patientForm(id) {
-  const p = S.patients.find(x => x.id === id) || { name: '', phone: '', birth: '', email: '', cpf: '', notes: '' };
-  modal(`<h2>${id ? 'Editar paciente' : 'Novo paciente'}</h2>
-    <label class="f">Nome completo</label><input id="f_name" value="${esc(p.name)}">
-    <div class="grid2"><div><label class="f">Telefone</label><input id="f_phone" inputmode="tel" value="${esc(p.phone)}"></div><div><label class="f">Nascimento</label><input id="f_birth" type="date" value="${esc(p.birth)}"></div></div>
-    <div class="grid2"><div><label class="f">E-mail</label><input id="f_email" type="email" value="${esc(p.email)}"></div><div><label class="f">CPF</label><input id="f_cpf" inputmode="numeric" value="${esc(p.cpf)}"></div></div>
-    <label class="f">Observações médicas</label><textarea rows="2" id="f_notes">${esc(p.notes)}</textarea>
-    <div class="actions" style="display:flex; gap:8px; margin-top:16px;">
-      ${id ? `<button class="btn danger" onclick="delItem('patients','${id}')">Excluir</button>` : `<button class="btn line" onclick="closeModal()">Cancelar</button>`}
-      <button class="btn sp" onclick="savePatient('${id || ''}')">Salvar</button>
-    </div>`);
-}
-
-async function savePatient(id) {
-  const name = val('name').trim();
-  if (!name) return toast('Informe o nome do paciente.', true);
-  const old = S.patients.find(x => x.id === id) || { id: uid(), odonto: {} };
-  const updated = { ...old, name, phone: val('phone'), birth: val('birth'), email: val('email'), cpf: val('cpf'), notes: val('notes') };
-  if (id) {
-    S.patients = S.patients.map(x => x.id === id ? updated : x);
-  } else {
-    S.patients.push(updated);
-  }
-  persistLocal(); closeModal(); render(); toast('Paciente salvo.');
-}
-
-function val(id) { const el = document.getElementById('f_' + id); return el ? el.value : ''; }
-function num(id) { return parseFloat(val(id)) || 0; }
-
-function scrPatient() {
-  const p = S.patients.find(x => x.id === V.pid);
-  if (!p) return empty('Paciente não encontrado.');
-  const ptab = V.ptab || 'info';
-  return head(esc(p.name), "nav('patients')", `<button class="btn sm ghost" onclick="patientForm('${p.id}')">Editar</button>`) +
-    `<div class="chips">
-      <button class="chip ${ptab==='info'?'on':''}" onclick="V.ptab='info';render()">Informações</button>
-      <button class="chip ${ptab==='odonto'?'on':''}" onclick="V.ptab='odonto';render()">Odontograma</button>
-      <button class="chip ${ptab==='plan'?'on':''}" onclick="V.ptab='plan';render()">Plano</button>
-      <button class="chip ${ptab==='orc'?'on':''}" onclick="V.ptab='orc';render()">Orçamentos</button>
-      <button class="chip ${ptab==='fin'?'on':''}" onclick="V.ptab='fin';render()">Financeiro</button>
-    </div>` +
-    (ptab === 'info' ? `<div class="card"><h3>Dados cadastrais</h3><p class="muted">Telefone: ${esc(p.phone || 'Não informado')}</p><p class="muted">Nascimento: ${fdate(p.birth) || 'Não informado'}</p><p class="muted">CPF: ${esc(p.cpf || 'Não informado')}</p></div>` :
-     ptab === 'odonto' ? `<div class="card c"><p class="muted">Odontograma do paciente</p></div>` :
-     ptab === 'plan' ? tabPlan(p) :
-     ptab === 'orc' ? tabOrc(p) : tabFin(p));
-}
-
-function tabPlan(p) {
-  const l = S.plans.filter(x => x.patient_id === p.id);
-  return `<button class="btn block mb" onclick="planForm('${p.id}')">+ Novo procedimento no plano</button>` + (l.length ? l.map(x => item({ t: esc(x.proc), s: x.tooth ? 'Dente ' + x.tooth : '', r: money(x.value) })).join('') : empty('Nenhum procedimento no plano.'));
-}
-function planForm(pid) {
-  modal(`<h2>Adicionar ao Plano</h2><label class="f">Procedimento</label><input id="f_proc"><label class="f">Dente</label><input id="f_tooth"><label class="f">Valor (R$)</label><input id="f_value" type="number"><button class="btn block mt" onclick="savePlan('${pid}')">Adicionar</button>`);
-}
-async function savePlan(pid) {
-  const proc = val('proc'); if (!proc) return toast('Informe o procedimento.', true);
-  S.plans.push({ id: uid(), patient_id: pid, tooth: val('tooth'), proc, value: num('value'), status: 'planejado' });
-  persistLocal(); closeModal(); render(); toast('Adicionado ao plano.');
-}
-
-function tabOrc(p) {
-  const l = S.budgets.filter(b => b.patient_id === p.id);
-  return `<button class="btn block mb" onclick="newBudget('${p.id}')">+ Novo orçamento</button>` + (l.length ? l.map(b => item({ t: 'Orçamento #' + b.num, r: money(bTot(b).total) })).join('') : empty('Nenhum orçamento.'));
-}
-
-function bTot(b) {
-  const sub = (b.items || []).reduce((acc, i) => acc + ((+i.qty || 1) * (+i.value || 0)), 0);
-  const disc = sub * ((b.discount || 0) / 100);
-  return { total: Math.max(0, sub - disc) };
-}
-
-function newBudget(pid) {
-  V.bud = { id: uid(), patient_id: pid || '', num: S.budgets.length + 1, items: [], discount: 0, status: 'pendente' };
-  nav('budget');
-}
-
-function scrBudget() {
-  const b = V.bud;
-  return head(`Orçamento #${b.num}`, "nav('budgets')") +
-    `<div class="card"><label class="f">Paciente</label><select onchange="V.bud.patient_id=this.value">${S.patients.map(p => `<option value="${p.id}" ${b.patient_id===p.id?'selected':''}>${esc(p.name)}</option>`).join('')}</select></div>` +
-    `<button class="btn block mt" onclick="saveBudget()">Salvar orçamento</button>`;
-}
-
-async function saveBudget() {
-  if (!V.bud.patient_id) return toast('Selecione o paciente.', true);
-  S.budgets.push(V.bud);
-  persistLocal(); nav('budgets'); toast('Orçamento salvo.');
-}
-
-function scrBudgets() {
-  const l = S.budgets;
-  return head('Orçamentos', "nav('more')", `<button class="btn sm" onclick="newBudget()">+ Novo</button>`) +
-    (l.length ? l.map(b => item({ t: 'Orçamento #' + b.num, r: money(bTot(b).total) })).join('') : empty('Nenhum orçamento.'));
-}
-
-function scrAgenda() {
-  const l = S.appts.filter(a => a.date === V.agendaDate);
-  return head('Agenda', null, `<button class="btn sm" onclick="apptForm()">+ Agendar</button>`) +
-    `<div class="row mb"><input type="date" value="${V.agendaDate}" onchange="V.agendaDate=this.value||today();render()"></div>` +
-    (l.length ? l.map(a => item({ av: a.time || '—', t: S.patients.find(p => p.id === a.patient_id)?.name || 'Paciente', s: a.proc || 'Consulta' })).join('') : empty('Nenhuma consulta neste dia.'));
-}
-function apptForm() {
-  if (!S.patients.length) return toast('Cadastre um paciente primeiro.', true);
-  modal(`<h2>Nova consulta</h2><label class="f">Paciente</label><select id="f_pid">${S.patients.map(p=>`<option value="${p.id}">${esc(p.name)}</option>`).join('')}</select><label class="f">Data</label><input type="date" id="f_date" value="${today()}"><label class="f">Hora</label><input type="time" id="f_time" value="09:00"><button class="btn block mt" onclick="saveAppt()">Salvar</button>`);
-}
-async function saveAppt() {
-  S.appts.push({ id: uid(), patient_id: val('pid'), date: val('date'), time: val('time'), proc: 'Consulta', status: 'agendado' });
-  persistLocal(); closeModal(); render(); toast('Consulta agendada.');
-}
-
-function scrFin() {
-  const all = S.tx;
-  const saldo = sum(all.filter(x => x.type === 'entrada' && x.status === 'pago')) - sum(all.filter(x => x.type === 'despesa' && x.status === 'pago'));
-  return head('Financeiro', null, `<button class="btn sm" onclick="txForm('entrada')">+ Lançamento</button>`) +
-    `<div class="card stat"><span>Saldo do mês</span><b class="${saldo>=0?'pos':'neg'}" style="font-size:28px">${money(saldo)}</b></div>` +
-    (all.length ? all.map(x => item({ av: x.type==='entrada'?'+':'−', t: esc(x.description), r: money(x.value) })).join('') : empty('Nenhum lançamento financeiro.'));
-}
-
-function txForm(type = 'entrada') {
-  modal(`<h2>Novo ${type === 'entrada' ? 'Lançamento (Entrada)' : 'Lançamento (Despesa)'}</h2>
-    <label class="f">Tipo</label><select id="f_type"><option value="entrada" ${type==='entrada'?'selected':''}>Entrada</option><option value="despesa" ${type==='despesa'?'selected':''}>Despesa</option></select>
-    <label class="f">Descrição</label><input id="f_desc">
-    <label class="f">Valor</label><input type="number" id="f_val">
-    <button class="btn block mt" onclick="saveTx()">Salvar</button>`);
-}
-async function saveTx() {
-  S.tx.push({ id: uid(), type: val('type') || 'entrada', description: val('desc'), value: num('val'), date: today(), status: 'pago' });
-  persistLocal(); closeModal(); render(); toast('Lançamento salvo.');
-}
-
-function tabFin(p) {
-  const l = S.tx.filter(x => x.patient_id === p.id);
-  return l.length ? l.map(x => item({ t: esc(x.description), r: money(x.value) })).join('') : empty('Nenhum lançamento para este paciente.');
-}
-
-function scrReports() {
-  return head('Relatórios', "nav('home')") + `<div class="card"><p class="muted">Relatórios gerais da clínica e fluxo de caixa.</p></div>`;
-}
-
-function scrProcs() {
-  return head('Procedimentos', "nav('more')", `<button class="btn sm" onclick="procForm()">+ Novo</button>`) +
-    (S.procs.length ? S.procs.map(o => item({ av: '🦷', t: esc(o.name), r: money(o.value) })).join('') : empty('Tabela vazia.'));
-}
-function procForm() {
-  modal(`<h2>Novo Procedimento</h2><label class="f">Nome</label><input id="f_pname"><label class="f">Valor</label><input type="number" id="f_pval"><button class="btn block mt" onclick="saveProc()">Salvar</button>`);
-}
-async function saveProc() {
-  S.procs.push({ id: uid(), name: val('pname'), value: num('pval') });
-  persistLocal(); closeModal(); render(); toast('Procedimento salvo.');
-}
-
-function scrMore() {
-  const m = (icon, t, s, click) => `<button class="menu" onclick="${click}"><span class="mi">${icon}</span><span class="sp"><b>${t}</b><small>${s}</small></span></button>`;
-  return head('Mais') +
-    m('📁', 'Orçamentos', 'Todos os orçamentos', "nav('budgets')") +
-    m('📊', 'Relatórios', 'Fluxo de caixa e categorias', "nav('reports')") +
-    m('🦷', 'Tabela de procedimentos', S.procs.length + ' procedimentos', "nav('procs')") +
-    m('⚙️', 'Dados da clínica', esc(CLINIC.name || 'Configurar clínica'), 'clinicForm()') +
-    m('🚀', 'Carregar dados de exemplo', 'Pacientes e lançamentos fictícios', 'seedDemo()') +
-    m('🗑️', 'Apagar dados deste aparelho', 'Remove tudo do modo local', 'wipeLocal()');
-}
-
-function clinicForm() {
-  modal(`<h2>Dados da clínica</h2><label class="f">Nome</label><input id="f_cname" value="${esc(CLINIC.name)}"><button class="btn block mt" onclick="saveClinic()">Salvar</button>`);
-}
-async function saveClinic() {
-  CLINIC = { name: val('cname'), dentist: '', cro: '', phone: '' };
-  try { localStorage.setItem('gestor_odonto_clinic', JSON.stringify(CLINIC)); } catch(e){}
-  closeModal(); render(); toast('Dados salvos.');
-}
-
-async function seedDemo() {
-  if (!confirm('Adicionar pacientes e lançamentos de exemplo?')) return;
-  const p1 = uid(), p2 = uid();
-  S.patients = [
-    { id: p1, name: 'Ana Souza', phone: '11999887766', birth: '1992-05-14', odonto: {} },
-    { id: p2, name: 'Carlos Eduardo', phone: '11988776655', birth: '1985-11-20', odonto: {} }
-  ];
-  S.tx = [{ id: uid(), type: 'entrada', description: 'Atendimento', value: 300, date: today(), status: 'pago' }];
-  persistLocal(); render(); toast('Dados de exemplo adicionados.');
-}
-
-function wipeLocal() {
-  if (!confirm('Apagar todos os dados salvos?')) return;
-  S = { patients: [], plans: [], budgets: [], tx: [], appts: [], procs: [] };
-  persistLocal(); seedProcsIfEmpty().then(() => { render(); toast('Dados apagados.'); });
-}
-
-// Inicialização geral
-(async function boot() {
-  loadLocal(); loadClinic(); await seedProcsIfEmpty(); render();
-})();
 </script>
-</body>
-</html>
