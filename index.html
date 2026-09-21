@@ -41,12 +41,6 @@
   .c { text-align: center; }
   .r { text-align: right; }
   .muted { color: var(--muted); font-size: 13px; }
-  .tag { display: inline-block; padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight: 600; }
-  .tag.ok { background: #d1fae5; color: #065f46; }
-  .tag.rose { background: #ffe4e6; color: #9f1239; }
-  .tag.blue { background: var(--brand-light); color: var(--brand-dark); }
-  .tag.gray { background: #f1f5f9; color: #475569; }
-  .tag.warn { background: #fef3c7; color: #b45309; }
   nav.bot { position: fixed; bottom: 0; left: 0; right: 0; background: var(--surface); border-top: 1px solid var(--border); display: flex; justify-content: space-around; padding: 8px 0; z-index: 100; }
   nav.bot button { background: none; border: none; display: flex; flex-direction: column; align-items: center; font-size: 11px; color: var(--muted); gap: 4px; cursor: pointer; flex: 1; }
   nav.bot button.on { color: var(--brand); font-weight: 600; }
@@ -65,27 +59,6 @@
   .stat b { font-size: 20px; color: var(--text); margin-top: 2px; }
   .pos { color: var(--ok); }
   .neg { color: var(--rose); }
-  .kv { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid var(--border); font-size: 14px; }
-  .kv:last-child { border-bottom: none; }
-  .daynav { display: flex; align-items: center; margin-bottom: 12px; }
-  .seg { display: flex; background: var(--border); padding: 2px; border-radius: var(--radius); margin-bottom: 12px; }
-  .seg button { flex: 1; background: transparent; border: none; padding: 8px; font-size: 13px; font-weight: 600; color: var(--muted); border-radius: 10px; cursor: pointer; }
-  .seg button.on { background: var(--surface); color: var(--text); box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
-  .bars { display: flex; align-items: flex-end; height: 120px; gap: 8px; padding-top: 16px; border-bottom: 1px solid var(--border); }
-  .bcol { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; height: 100%; justify-content: flex-end; }
-  .bpair { display: flex; gap: 2px; width: 100%; height: 100%; align-items: flex-end; justify-content: center; }
-  .bpair i { width: 8px; border-radius: 4px 4px 0 0; }
-  .bcol small { font-size: 10px; color: var(--muted); }
-  .legend { display: flex; justify-content: center; gap: 16px; margin-top: 8px; font-size: 12px; color: var(--muted); }
-  .legend span { display: flex; align-items: center; gap: 4px; }
-  .legend i { width: 8px; height: 8px; border-radius: 50%; }
-  .hb { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; font-size: 13px; }
-  .hb span { width: 110px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--muted); }
-  .hb .bar { flex: 1; background: var(--border); height: 8px; border-radius: 4px; overflow: hidden; }
-  .hb .bar i { display: block; height: 100%; background: var(--brand); border-radius: 4px; }
-  .hb b { width: 70px; text-align: right; font-size: 12px; }
-  .bi { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px; margin-bottom: 8px; }
-  .tot { background: var(--brand-light); border-radius: var(--radius); padding: 12px; margin-top: 12px; }
 </style>
 </head>
 <body>
@@ -97,6 +70,7 @@
 <div class="container" id="app-content"></div>
 
 <nav class="bot hidden" id="app-nav">
+  <button onclick="nav('home')" id="nav-home">Início</button>
   <button onclick="nav('patients')" id="nav-patients">Pacientes</button>
   <button onclick="nav('agenda')" id="nav-agenda">Agenda</button>
   <button onclick="nav('fin')" id="nav-fin">Financeiro</button>
@@ -105,12 +79,10 @@
 
 <div id="modal-container"></div>
 <div id="toast-container"></div>
-<div id="printdoc" class="hidden"></div>
 
 <script>
 let S = { patients: [], plans: [], budgets: [], tx: [], appts: [], procs: [] };
-let V = { screen: 'patients', pfilter: '', bfilter: 'todos', ftype: 'todas', period: 1, month: new Date().toISOString().slice(0,7), agendaDate: new Date().toISOString().slice(0,10) };
-let LOCAL = true, sb = null, user = null;
+let V = { screen: 'home', pfilter: '', agendaDate: new Date().toISOString().slice(0,10) };
 let CLINIC = { name: '', dentist: '', cro: '', phone: '' };
 
 const $ = s => document.querySelector(s);
@@ -120,7 +92,6 @@ const fdate = d => d ? d.split('-').reverse().join('/') : '';
 const today = () => new Date().toISOString().slice(0, 10);
 const esc = s => String(s || '').replace(/"/g, '&quot;');
 const sum = arr => arr.reduce((a, b) => a + Number(b.value || 0), 0);
-const MONTHS = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
 
 function toast(msg, err) {
   const t = document.createElement('div');
@@ -139,10 +110,16 @@ function nav(screen, params = {}) {
 
 function render() {
   let html = '';
-  const showNav = ['patients', 'agenda', 'fin', 'more'].includes(V.screen);
+  const showNav = ['home', 'patients', 'agenda', 'fin', 'more'].includes(V.screen);
   document.getElementById('app-nav').classList.toggle('hidden', !showNav);
+  
+  // Destacar o botão ativo na barra inferior
+  document.querySelectorAll('nav.bot button').forEach(b => b.classList.remove('on'));
+  const activeBtn = document.getElementById('nav-' + V.screen);
+  if (activeBtn) activeBtn.classList.add('on');
 
-  if (V.screen === 'patients') html = scrPatients();
+  if (V.screen === 'home') html = scrHome();
+  else if (V.screen === 'patients') html = scrPatients();
   else if (V.screen === 'patient') html = scrPatient();
   else if (V.screen === 'agenda') html = scrAgenda();
   else if (V.screen === 'fin') html = scrFin();
@@ -168,7 +145,7 @@ function empty(msg) {
 }
 
 function item(opt) {
-  return `<div class="item-row" onclick="${opt.click || ''}" style="display:flex; align-items:center; justify-content:space-between; padding:12px; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); margin-bottom:8px; cursor:pointer;">
+  return `<div onclick="${opt.click || ''}" style="display:flex; align-items:center; justify-content:space-between; padding:12px; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); margin-bottom:8px; cursor:pointer;">
     <div style="display:flex; align-items:center; gap:12px;">
       ${opt.av ? `<div style="background:var(--brand-light); color:var(--brand); width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:600; font-size:14px;">${opt.av}</div>` : ''}
       <div><b>${opt.t}</b><br><small class="muted">${opt.s || ''}</small></div>
@@ -209,7 +186,28 @@ async function seedProcsIfEmpty() {
   }
 }
 
-// ---------------- Funções de Pacientes e Telas ----------------
+// Tela Inicial / Dashboard
+function scrHome() {
+  const totalPacientes = S.patients.length;
+  const consultasHoje = S.appts.filter(a => a.date === today()).length;
+  const saldo = sum(S.tx.filter(x => x.type === 'entrada' && x.status === 'pago')) - sum(S.tx.filter(x => x.type === 'despesa' && x.status === 'pago'));
+
+  return head(esc(CLINIC.name || 'Gestor Odonto')) +
+    `<div class="grid2" style="margin-bottom:12px;">
+      <div class="card stat" onclick="nav('patients')"><span>Pacientes</span><b>${totalPacientes}</b></div>
+      <div class="card stat" onclick="nav('agenda')"><span>Consultas Hoje</span><b>${consultasHoje}</b></div>
+    </div>
+    <div class="card stat" onclick="nav('fin')" style="margin-bottom:16px;">
+      <span>Saldo em Caixa</span>
+      <b class="${saldo>=0?'pos':'neg'}" style="font-size:24px">${money(saldo)}</b>
+    </div>
+    <div class="card">
+      <h3 style="margin-bottom:12px;">Acesso Rápido</h3>
+      <button class="btn block mb" onclick="patientForm()" style="margin-bottom:8px;">+ Novo Paciente</button>
+      <button class="btn block line" onclick="nav('agenda')">Ver Agenda de Hoje</button>
+    </div>`;
+}
+
 function scrPatients() {
   const l = S.patients.filter(p => p.name.toLowerCase().includes((V.pfilter || '').toLowerCase()));
   return head('Pacientes', null, `<button class="btn sm" onclick="patientForm()">+ Novo</button>`) +
@@ -223,7 +221,7 @@ function patientForm(id) {
     <label class="f">Nome completo</label><input id="f_name" value="${esc(p.name)}">
     <div class="grid2"><div><label class="f">Telefone</label><input id="f_phone" inputmode="tel" value="${esc(p.phone)}"></div><div><label class="f">Nascimento</label><input id="f_birth" type="date" value="${esc(p.birth)}"></div></div>
     <div class="grid2"><div><label class="f">E-mail</label><input id="f_email" type="email" value="${esc(p.email)}"></div><div><label class="f">CPF</label><input id="f_cpf" inputmode="numeric" value="${esc(p.cpf)}"></div></div>
-    <label class="f">Observações médicas / alérgenos</label><textarea rows="2" id="f_notes">${esc(p.notes)}</textarea>
+    <label class="f">Observações médicas</label><textarea rows="2" id="f_notes">${esc(p.notes)}</textarea>
     <div class="actions" style="display:flex; gap:8px; margin-top:16px;">
       ${id ? `<button class="btn danger" onclick="delItem('patients','${id}')">Excluir</button>` : `<button class="btn line" onclick="closeModal()">Cancelar</button>`}
       <button class="btn sp" onclick="savePatient('${id || ''}')">Salvar</button>
@@ -258,7 +256,7 @@ function scrPatient() {
       <button class="chip ${ptab==='orc'?'on':''}" onclick="V.ptab='orc';render()">Orçamentos</button>
       <button class="chip ${ptab==='fin'?'on':''}" onclick="V.ptab='fin';render()">Financeiro</button>
     </div>` +
-    (ptab === 'info' ? `<div class="card"><h3>Dados cadastrais</h3><p class="muted">Telefone: ${esc(p.phone || 'Não informado')}</p><p class="muted">Nascimento: ${fdate(p.birth) || 'Não informado'}</p><p class="muted">CPF: ${esc(p.cpf || 'Não informado')}</p></div>${p.notes ? `<div class="card"><h3>Observações</h3><p>${esc(p.notes)}</p></div>` : ''}` :
+    (ptab === 'info' ? `<div class="card"><h3>Dados cadastrais</h3><p class="muted">Telefone: ${esc(p.phone || 'Não informado')}</p><p class="muted">Nascimento: ${fdate(p.birth) || 'Não informado'}</p><p class="muted">CPF: ${esc(p.cpf || 'Não informado')}</p></div>` :
      ptab === 'odonto' ? `<div class="card c"><p class="muted">Odontograma do paciente</p></div>` :
      ptab === 'plan' ? tabPlan(p) :
      ptab === 'orc' ? tabOrc(p) : tabFin(p));
@@ -269,11 +267,7 @@ function tabPlan(p) {
   return `<button class="btn block mb" onclick="planForm('${p.id}')">+ Novo procedimento no plano</button>` + (l.length ? l.map(x => item({ t: esc(x.proc), s: x.tooth ? 'Dente ' + x.tooth : '', r: money(x.value) })).join('') : empty('Nenhum procedimento no plano.'));
 }
 function planForm(pid) {
-  modal(`<h2>Adicionar ao Plano</h2>
-    <label class="f">Procedimento</label><input id="f_proc">
-    <label class="f">Dente</label><input id="f_tooth">
-    <label class="f">Valor (R$)</label><input id="f_value" type="number">
-    <button class="btn block mt" onclick="savePlan('${pid}')">Adicionar</button>`);
+  modal(`<h2>Adicionar ao Plano</h2><label class="f">Procedimento</label><input id="f_proc"><label class="f">Dente</label><input id="f_tooth"><label class="f">Valor (R$)</label><input id="f_value" type="number"><button class="btn block mt" onclick="savePlan('${pid}')">Adicionar</button>`);
 }
 async function savePlan(pid) {
   const proc = val('proc'); if (!proc) return toast('Informe o procedimento.', true);
@@ -283,22 +277,18 @@ async function savePlan(pid) {
 
 function tabOrc(p) {
   const l = S.budgets.filter(b => b.patient_id === p.id);
-  return `<button class="btn block mb" onclick="newBudget('${p.id}',null,'patient')">+ Novo orçamento</button>` + (l.length ? l.map(b => item({ t: 'Orçamento #' + b.num, r: money(bTot(b).total) })).join('') : empty('Nenhum orçamento.'));
+  return `<button class="btn block mb" onclick="newBudget('${p.id}')">+ Novo orçamento</button>` + (l.length ? l.map(b => item({ t: 'Orçamento #' + b.num, r: money(bTot(b).total) })).join('') : empty('Nenhum orçamento.'));
 }
 
 function bTot(b) {
   const sub = (b.items || []).reduce((acc, i) => acc + ((+i.qty || 1) * (+i.value || 0)), 0);
   const disc = sub * ((b.discount || 0) / 100);
-  const total = Math.max(0, sub - disc);
-  const entrada = Math.min(+b.entrada || 0, total);
-  const n = Math.max(1, parseInt(b.installments) || 1);
-  const rest = total - entrada;
-  return { sub, disc, total, entrada, n, rest, parc: rest / n };
+  return { total: Math.max(0, sub - disc) };
 }
 
-function newBudget(pid, items, from) {
-  V.bud = { id: uid(), patient_id: pid || '', num: 1, items: items || [], discount: 0, entrada: 0, installments: 1, first_due: today(), status: 'pendente', generated: false, notes: '', isNew: true };
-  V.bfrom = from || 'list'; nav('budget');
+function newBudget(pid) {
+  V.bud = { id: uid(), patient_id: pid || '', num: S.budgets.length + 1, items: [], discount: 0, status: 'pendente' };
+  nav('budget');
 }
 
 function scrBudget() {
@@ -320,16 +310,11 @@ function scrBudgets() {
     (l.length ? l.map(b => item({ t: 'Orçamento #' + b.num, r: money(bTot(b).total) })).join('') : empty('Nenhum orçamento.'));
 }
 
-// ---------------- Agenda & Financeiro & Relatórios ----------------
-const AST = { agendado: ['Agendado', 'blue'], confirmado: ['Confirmado', 'ok'], concluido: ['Concluído', 'gray'] };
-function apptRow(a) {
-  return item({ av: a.time || '—', t: S.patients.find(p => p.id === a.patient_id)?.name || 'Paciente', s: a.proc || 'Consulta' });
-}
 function scrAgenda() {
   const l = S.appts.filter(a => a.date === V.agendaDate);
   return head('Agenda', null, `<button class="btn sm" onclick="apptForm()">+ Agendar</button>`) +
     `<div class="row mb"><input type="date" value="${V.agendaDate}" onchange="V.agendaDate=this.value||today();render()"></div>` +
-    (l.length ? l.map(apptRow).join('') : empty('Nenhuma consulta neste dia.'));
+    (l.length ? l.map(a => item({ av: a.time || '—', t: S.patients.find(p => p.id === a.patient_id)?.name || 'Paciente', s: a.proc || 'Consulta' })).join('') : empty('Nenhuma consulta neste dia.'));
 }
 function apptForm() {
   if (!S.patients.length) return toast('Cadastre um paciente primeiro.', true);
