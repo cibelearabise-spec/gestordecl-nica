@@ -200,6 +200,27 @@ input:focus,select:focus,textarea:focus{border-color:var(--moss);box-shadow:0 0 
 .finds{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
 .find{background:var(--paper);border:1px solid var(--line);border-radius:999px;padding:7px 13px;font-size:13px;color:var(--ink);cursor:pointer;text-align:left}
 
+/* foto do paciente e anexos */
+.av img{width:100%;height:100%;object-fit:cover}
+.avpick{display:flex;align-items:center;gap:16px;margin-bottom:4px}
+.avpick .circ{position:relative;flex:none;width:72px;height:72px;border-radius:50%;background:var(--sage);color:var(--moss-d);display:grid;place-items:center;font-weight:800;font-size:22px;overflow:hidden;cursor:pointer}
+.avpick .circ img{width:100%;height:100%;object-fit:cover}
+.avpick .circ .cam{position:absolute;right:-2px;bottom:-2px;width:26px;height:26px;border-radius:50%;background:var(--forest);color:#fff;display:grid;place-items:center;border:2px solid #fff}
+.avpick .txt{font-size:13px;color:var(--muted)}
+.avpick .txt b{display:block;color:var(--ink);font-size:14.5px;margin-bottom:2px}
+.att-kinds{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 16px}
+.att-kinds button{border:1px solid #d5dac9;background:#fff;color:var(--ink);border-radius:999px;padding:12px 8px;font-size:12.5px;font-weight:700;cursor:pointer;flex:1;min-width:120px;display:flex;flex-direction:column;align-items:center;gap:6px}
+.att-kinds button.on{background:var(--forest);color:#fff;border-color:var(--forest)}
+.att-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px}
+.att-card{position:relative;border:1px solid var(--line);border-radius:16px;overflow:hidden;background:#fff;cursor:pointer}
+.att-card .th{aspect-ratio:1/1;background:var(--sage);display:grid;place-items:center;color:var(--moss-d);overflow:hidden}
+.att-card .th img{width:100%;height:100%;object-fit:cover}
+.att-card .cap{padding:8px 10px}
+.att-card .cap b{display:block;font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.att-card .cap small{color:var(--muted);font-size:11px}
+.att-view{max-width:100%;max-height:70vh;border-radius:14px;display:block;margin:0 auto;background:var(--paper)}
+.uploading{opacity:.5;pointer-events:none}
+
 /* orçamento */
 .bi{background:#fff;border:1px solid var(--line);border-radius:18px;padding:12px;margin-bottom:10px}
 .bi .g{display:grid;grid-template-columns:1fr 1fr 2fr;gap:8px;margin-top:4px}
@@ -325,7 +346,8 @@ const SUPABASE_URL = "https://hphqdfupgynomgzzyorl.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_IFZiGY6TDQfAaGPD0xgltA_S6bCOHZg";
 
 /* ---------- utilidades ---------- */
-const T = {patients:'gestor_patients',plans:'gestor_plan_items',budgets:'gestor_budgets',tx:'gestor_transactions',appts:'gestor_appointments',procs:'gestor_procedures'};
+const T = {patients:'gestor_patients',plans:'gestor_plan_items',budgets:'gestor_budgets',tx:'gestor_transactions',appts:'gestor_appointments',procs:'gestor_procedures',attachments:'gestor_attachments'};
+const BUCKET='clinica-arquivos';
 const LS='gestor_odonto_v1', LSC='gestor_odonto_clinic';
 const $=s=>document.querySelector(s);
 const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -346,6 +368,7 @@ const shiftMonth=(m,n)=>iso(new Date(+m.slice(0,4),+m.slice(5,7)-1+n,1)).slice(0
 function addMonths(s,n){const [y,m,d]=s.split('-').map(Number);const dt=new Date(y,m-1+n,1);const last=new Date(dt.getFullYear(),dt.getMonth()+1,0).getDate();dt.setDate(Math.min(d,last));return iso(dt);}
 const digits=s=>String(s||'').replace(/\D/g,'');
 const initials=n=>String(n||'?').split(/\s+/).filter(Boolean).slice(0,2).map(w=>w[0]).join('').toUpperCase();
+const avatarInner=p=>p&&p.avatar_url?`<img src="${esc(p.avatar_url)}" alt="" onerror="this.parentElement.textContent='${esc(initials(p.name))}'">`:esc(initials(p&&p.name));
 const short=n=>{const w=String(n||'').trim().split(/\s+/);return w.length>1?w[0]+' '+w[w.length-1][0]+'.':(w[0]||'');};
 const pname=id=>{const p=S.patients.find(x=>x.id===id);return p?p.name:'—';};
 function waLink(phone,text){let d=digits(phone);if(d&&d.length<=11)d='55'+d;return 'https://wa.me/'+d+(text?'?text='+encodeURIComponent(text):'');}
@@ -373,7 +396,10 @@ const IC={
   gear:'<circle cx="12" cy="12" r="3"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M18.7 5.3l-2.1 2.1M7.4 16.6l-2.1 2.1"/>',
   out:'<path d="M9 4H5v16h4M16 8l4 4-4 4M20 12H9"/>',
   save:'<path d="M12 3v12M8 11l4 4 4-4M5 20h14"/>',
-  send:'<path d="M12 15V3M8 7l4-4 4 4M5 14v6h14v-6"/>'
+  send:'<path d="M12 15V3M8 7l4-4 4 4M5 14v6h14v-6"/>',
+  camera:'<path d="M4 8h3l1.6-2.5h6.8L17 8h3a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13.5" r="3.6"/>',
+  image:'<rect x="3" y="4" width="18" height="16" rx="3"/><circle cx="9" cy="10" r="2"/><path d="m4 18 5-5 3.5 3.5L17 12l3 3"/>',
+  x:'<path d="M6 6l12 12M18 6L6 18"/>'
 };
 const ic=(n,s=20)=>`<svg viewBox="0 0 24 24" width="${s}" height="${s}" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${IC[n]||''}</svg>`;
 let tt;function toast(m,err){const t=$('#toast');t.textContent=m;t.className='show'+(err?' err':'');clearTimeout(tt);tt=setTimeout(()=>{t.className='';},2800);}
@@ -397,9 +423,37 @@ const BRK='<i class="c tl"></i><i class="c tr"></i><i class="c bl"></i><i class=
 const photo=(src,pos,hi)=>`<img class="art photo" src="${src}" alt="" style="object-position:${pos}" ${hi?'fetchpriority="high"':'loading="lazy"'} decoding="async" onerror="this.remove()">`;
 let HERO_ART='';
 
+/* ---------- fotos: compressão e envio ---------- */
+function compressImage(file,maxDim,quality){
+  return new Promise((resolve,reject)=>{
+    const img=new Image(),fr=new FileReader();
+    fr.onerror=()=>reject(new Error('Não foi possível ler o arquivo.'));
+    fr.onload=()=>{
+      img.onerror=()=>reject(new Error('Arquivo de imagem inválido.'));
+      img.onload=()=>{
+        const scale=Math.min(1,maxDim/Math.max(img.width,img.height));
+        const w=Math.round(img.width*scale),h=Math.round(img.height*scale);
+        const cv=document.createElement('canvas');cv.width=w;cv.height=h;
+        cv.getContext('2d').drawImage(img,0,0,w,h);
+        cv.toBlob(blob=>{if(!blob)return reject(new Error('Falha ao processar a imagem.'));resolve({blob,dataUrl:cv.toDataURL('image/jpeg',quality)});},'image/jpeg',quality);
+      };
+      img.src=fr.result;
+    };
+    fr.readAsDataURL(file);
+  });
+}
+async function uploadToBucket(path,blob){
+  const {error}=await sb.storage.from(BUCKET).upload(path,blob,{contentType:'image/jpeg',upsert:true});
+  if(error)throw error;
+  const {data,error:e2}=await sb.storage.from(BUCKET).createSignedUrl(path,60*60*24*365);
+  if(e2)throw e2;
+  return data.signedUrl;
+}
+async function removeFromBucket(path){if(!path)return;try{await sb.storage.from(BUCKET).remove([path]);}catch(e){}}
+
 /* ---------- estado e dados ---------- */
 let sb=null,LOCAL=true,user=null,CLINIC={};
-let S={patients:[],plans:[],budgets:[],tx:[],appts:[],procs:[]};
+let S={patients:[],plans:[],budgets:[],tx:[],appts:[],procs:[],attachments:[]};
 const V={screen:'home',pid:null,ptab:'dados',q:'',tool:'carie',dec:false,month:today().slice(0,7),ftype:'todas',agendaDate:today(),aview:'month',bfilter:'todos',period:6,bud:null,bfrom:'list',txType:'entrada'};
 const DEF_PROCS=[['Consulta / avaliação',150],['Profilaxia (limpeza)',180],['Restauração de resina - 1 face',200],['Restauração de resina - 2 faces',280],['Restauração de resina - 3 faces',350],['Tratamento de canal (endodontia)',900],['Extração simples',250],['Extração de siso',500],['Coroa protética',1500],['Implante unitário',3500],['Clareamento dental',900],['Faceta de resina',600],['Raspagem periodontal (por sextante)',150],['Aplicação de flúor',80],['Selante',90],['Instalação de aparelho ortodôntico',1200],['Manutenção ortodôntica',180],['Alinhadores ortodônticos (plano)',8000],['Radiografia periapical',40],['Radiografia panorâmica',120]];
 
@@ -430,11 +484,24 @@ async function bulkInsert(kind,rows){
   S[kind].push(...data);
 }
 async function del(kind,id){
-  S[kind]=S[kind].filter(x=>x.id!==id);
-  if(kind==='patients'){S.plans=S.plans.filter(x=>x.patient_id!==id);S.budgets=S.budgets.filter(x=>x.patient_id!==id);S.appts=S.appts.filter(x=>x.patient_id!==id);S.tx.forEach(x=>{if(x.patient_id===id)x.patient_id=null;});}
+  let orphanPaths=[];
+  if(kind==='patients'){
+    const p=S.patients.find(x=>x.id===id);
+    if(p&&p.avatar_path)orphanPaths.push(p.avatar_path);
+    orphanPaths.push(...S.attachments.filter(a=>a.patient_id===id&&a.path).map(a=>a.path));
+    S.plans=S.plans.filter(x=>x.patient_id!==id);S.budgets=S.budgets.filter(x=>x.patient_id!==id);S.appts=S.appts.filter(x=>x.patient_id!==id);S.tx.forEach(x=>{if(x.patient_id===id)x.patient_id=null;});
+    S.attachments=S.attachments.filter(a=>a.patient_id!==id);
+  }
   if(kind==='budgets')S.tx.forEach(x=>{if(x.budget_id===id)x.budget_id=null;});
+  S[kind]=S[kind].filter(x=>x.id!==id);
   if(LOCAL)persistLocal();
-  else{const {error}=await sb.from(T[kind]).delete().eq('id',id);if(error)toast('Erro ao excluir: '+error.message,true);}
+  else{
+    const {error}=await sb.from(T[kind]).delete().eq('id',id);if(error)toast('Erro ao excluir: '+error.message,true);
+    if(kind==='patients'){
+      await sb.from(T.attachments).delete().eq('patient_id',id);
+      if(orphanPaths.length)await sb.storage.from(BUCKET).remove(orphanPaths);
+    }
+  }
 }
 async function delItem(kind,id){if(!confirm('Excluir este item?'))return;await del(kind,id);closeModal();render();toast('Excluído.');}
 async function seedProcsIfEmpty(){if(S.procs.length)return;await bulkInsert('procs',DEF_PROCS.map(([name,value])=>({id:uid(),name,value})));}
@@ -502,7 +569,7 @@ async function doAuth(mode){
   }
 }
 async function afterLogin(){loadClinic();await loadRemote();await seedProcsIfEmpty();V.screen='home';render();}
-async function doLogout(){if(!confirm('Sair da conta?'))return;await sb.auth.signOut();user=null;S={patients:[],plans:[],budgets:[],tx:[],appts:[],procs:[]};render();}
+async function doLogout(){if(!confirm('Sair da conta?'))return;await sb.auth.signOut();user=null;S={patients:[],plans:[],budgets:[],tx:[],appts:[],procs:[],attachments:[]};render();}
 
 /* ---------- início ---------- */
 function scrHome(){
@@ -550,22 +617,43 @@ function patientList(){
   const l=S.patients.filter(p=>!q||p.name.toLowerCase().includes(q)||(qd&&digits(p.phone).includes(qd))).sort((a,b)=>a.name.localeCompare(b.name,'pt-BR'));
   if(!l.length)return empty(S.patients.length?'Nenhum paciente encontrado.':'Nenhum paciente ainda. Toque em “Novo paciente” para cadastrar o primeiro.');
   return l.map(p=>{const n=S.plans.filter(x=>x.patient_id===p.id&&x.status!=='concluido').length;
-    return item({av:esc(initials(p.name)),t:esc(p.name),s:esc(p.phone||'Sem telefone'),r:n?`<span class="tag">${n} no plano</span>`:'',click:`openPatient('${p.id}')`});}).join('');
+    return item({av:avatarInner(p),t:esc(p.name),s:esc(p.phone||'Sem telefone'),r:n?`<span class="tag">${n} no plano</span>`:'',click:`openPatient('${p.id}')`});}).join('');
 }
 function openPatient(id){nav('patient',{pid:id,ptab:'dados'});}
 function patientForm(id){
   const p=S.patients.find(x=>x.id===id)||{};
+  const pid=id||uid();
   modal(`<h2>${id?'Editar paciente':'Novo paciente'}</h2>
+  <input type="hidden" id="f_pid" value="${pid}">
+  <div class="avpick"><div class="circ" id="avcirc" onclick="$('#avfile').click()">${avatarInner(p)}<span class="cam">${ic('camera',14)}</span></div>
+   <div class="txt"><b>Foto do paciente</b>Toque no círculo para escolher uma foto.</div></div>
+  <input id="avfile" type="file" accept="image/*" capture="environment" hidden onchange="onAvatarFile('${pid}',this)">
   <label class="f">Nome completo</label><input id="f_name" value="${esc(p.name)}" autocomplete="off">
   <div class="grid2"><div><label class="f">Telefone / WhatsApp</label><input id="f_phone" inputmode="tel" value="${esc(p.phone)}"></div><div><label class="f">Nascimento</label><input id="f_birth" type="date" value="${esc(p.birth)}"></div></div>
   <div class="grid2"><div><label class="f">E-mail</label><input id="f_email" type="email" value="${esc(p.email)}"></div><div><label class="f">CPF</label><input id="f_cpf" inputmode="numeric" value="${esc(p.cpf)}"></div></div>
   <label class="f">Anamnese e observações</label><textarea id="f_notes" rows="3">${esc(p.notes)}</textarea>
-  <div class="actions"><button class="btn line" onclick="closeModal()">Cancelar</button><button class="btn" onclick="savePatient('${id||''}')">Salvar paciente</button></div>`);
+  <div class="actions"><button class="btn line" onclick="closeModal()">Cancelar</button><button class="btn" onclick="savePatient('${id||''}','${pid}')">Salvar paciente</button></div>`);
 }
-async function savePatient(id){
+async function onAvatarFile(pid,inp){
+  const file=inp.files[0];if(!file)return;
+  const circ=$('#avcirc');circ.classList.add('uploading');
+  try{
+    const {blob,dataUrl}=await compressImage(file,480,.82);
+    let avatarUrl=dataUrl,avatarPath=null;
+    if(!LOCAL){avatarPath=`${user.id}/avatars/${pid}.jpg`;avatarUrl=await uploadToBucket(avatarPath,blob);}
+    circ.dataset.avatarSet='1';circ.dataset.avatarUrl=avatarUrl;circ.dataset.avatarPath=avatarPath||'';
+    circ.innerHTML=`<img src="${esc(avatarUrl)}" alt=""><span class="cam">${ic('camera',14)}</span>`;
+  }catch(e){toast('Não foi possível usar essa foto: '+e.message,true);}
+  circ.classList.remove('uploading');
+}
+async function savePatient(id,pid){
   const name=val('name').trim();if(!name)return toast('Informe o nome do paciente.',true);
   const old=S.patients.find(x=>x.id===id)||{};
-  const row=await save('patients',{...old,id:id||undefined,name,phone:val('phone'),birth:val('birth'),email:val('email'),cpf:val('cpf'),notes:val('notes'),odonto:old.odonto||{}});
+  const circ=$('#avcirc');
+  const changed=circ.dataset.avatarSet==='1';
+  const avatar_url=changed?circ.dataset.avatarUrl:old.avatar_url;
+  const avatar_path=changed?(circ.dataset.avatarPath||null):old.avatar_path;
+  const row=await save('patients',{...old,id:pid||id||undefined,name,phone:val('phone'),birth:val('birth'),email:val('email'),cpf:val('cpf'),notes:val('notes'),odonto:old.odonto||{},avatar_url:avatar_url||null,avatar_path:avatar_path||null});
   closeModal();toast('Paciente salvo.');
   if(id)render();else openPatient(row.id);
 }
@@ -573,9 +661,9 @@ async function delPatient(id){if(!confirm('Excluir o paciente e todo o históric
 
 function scrPatient(){
   const p=S.patients.find(x=>x.id===V.pid);if(!p){V.screen='patients';return scrPatients();}
-  const tabs=[['dados','Dados'],['odonto','Odontograma'],['plano','Plano de tratamento'],['orc','Orçamentos'],['fin','Financeiro']];
-  const body={dados:tabDados,odonto:tabOdonto,plano:tabPlano,orc:tabOrc,fin:tabFin}[V.ptab](p);
-  return `<div class="head"><button class="icon" onclick="nav('patients')" aria-label="Voltar">${ic('back',22)}</button><div class="av lg">${esc(initials(p.name))}</div><div class="sp"><h1 class="sm">${esc(p.name)}</h1><div class="muted">${esc(p.phone||'Sem telefone')}</div></div><button class="icon" onclick="patientForm('${p.id}')" aria-label="Editar">${ic('edit',20)}</button></div>
+  const tabs=[['dados','Dados'],['odonto','Odontograma'],['plano','Plano de tratamento'],['orc','Orçamentos'],['fin','Financeiro'],['anexos','Anexos']];
+  const body={dados:tabDados,odonto:tabOdonto,plano:tabPlano,orc:tabOrc,fin:tabFin,anexos:tabAnexos}[V.ptab](p);
+  return `<div class="head"><button class="icon" onclick="nav('patients')" aria-label="Voltar">${ic('back',22)}</button><div class="av lg">${avatarInner(p)}</div><div class="sp"><h1 class="sm">${esc(p.name)}</h1><div class="muted">${esc(p.phone||'Sem telefone')}</div></div><button class="icon" onclick="patientForm('${p.id}')" aria-label="Editar">${ic('edit',20)}</button></div>
   <div class="chips">${tabs.map(([k,l])=>`<button class="chip ${V.ptab===k?'on':''}" onclick="V.ptab='${k}';render()">${l}</button>`).join('')}</div>${body}`;
 }
 function tabDados(p){
@@ -591,6 +679,47 @@ function tabDados(p){
   <div class="sec"><h3>Próximas consultas</h3></div>
   ${next.length?lst(next.map(apptRow).join('')):empty('Sem consultas futuras.')}
   <div class="row mt"><button class="btn moss" onclick="apptForm('','${p.id}')">Agendar consulta</button><button class="btn danger" onclick="delPatient('${p.id}')">Excluir paciente</button></div>`;
+}
+
+/* ---------- anexos: fotos, radiografias e ficha em papel ---------- */
+const ATT_KINDS=[['foto','Foto do paciente','camera'],['radiografia','Radiografia','image'],['ficha','Ficha clínica em papel','file'],['outro','Outro documento','file']];
+const attKindLabel=k=>(ATT_KINDS.find(x=>x[0]===k)||[,k])[1];
+function tabAnexos(p){
+  const l=S.attachments.filter(a=>a.patient_id===p.id).sort((a,b)=>(b.created_at||'').localeCompare(a.created_at||''));
+  return `<p class="hint" style="margin-top:0">Fotos do paciente, radiografias e a ficha clínica de papel fotografada com o celular. As imagens são comprimidas antes de salvar.</p>
+  <div class="att-kinds">${ATT_KINDS.map(([k,l2,i])=>`<button onclick="pickAttachment('${p.id}','${k}')">${ic(i,20)}${l2}</button>`).join('')}</div>
+  ${l.length?`<div class="att-grid">${l.map(attCard).join('')}</div>`:empty('Nenhum anexo ainda. Toque em um dos tipos acima para enviar uma foto.')}
+  <input id="attfile" type="file" accept="image/*" capture="environment" multiple hidden onchange="onAttachmentFiles(this)">`;
+}
+function attCard(a){
+  return `<div class="att-card" onclick="attView('${a.id}')"><div class="th">${a.url?`<img src="${esc(a.url)}" alt="">`:ic('file',26)}</div><div class="cap"><b>${esc(a.name||attKindLabel(a.kind))}</b><small>${attKindLabel(a.kind)} · ${fdate(a.created_at)}</small></div></div>`;
+}
+function pickAttachment(pid,kind){V.attPid=pid;V.attKind=kind;$('#attfile').click();}
+async function onAttachmentFiles(inp){
+  const files=[...inp.files];inp.value='';if(!files.length)return;
+  toast('Enviando '+(files.length>1?files.length+' fotos…':'foto…'));
+  for(const file of files){
+    try{
+      const {blob,dataUrl}=await compressImage(file,1600,.75);
+      const id=uid();let url=dataUrl,path=null;
+      if(!LOCAL){path=`${user.id}/patients/${V.attPid}/${id}.jpg`;url=await uploadToBucket(path,blob);}
+      await save('attachments',{id,patient_id:V.attPid,kind:V.attKind,name:file.name,url,path});
+    }catch(e){toast('Não foi possível enviar '+file.name+': '+e.message,true);}
+  }
+  render();toast('Anexos salvos.');
+}
+function attView(id){
+  const a=S.attachments.find(x=>x.id===id);if(!a)return;
+  modal(`<h2>${esc(attKindLabel(a.kind))}</h2><p class="muted" style="margin:0 0 12px">${esc(a.name||'')} · ${fdate(a.created_at)}</p>
+  ${a.url?`<img class="att-view" src="${esc(a.url)}" alt="">`:'<p class="muted">Não foi possível carregar o arquivo.</p>'}
+  <div class="actions"><button class="btn line" onclick="closeModal()">Fechar</button><button class="btn danger" onclick="delAttachment('${a.id}')">Excluir</button></div>`);
+}
+async function delAttachment(id){
+  if(!confirm('Excluir este anexo?'))return;
+  const a=S.attachments.find(x=>x.id===id);
+  await del('attachments',id);
+  if(a&&a.path&&!LOCAL)await removeFromBucket(a.path);
+  closeModal();render();toast('Anexo excluído.');
 }
 
 /* ---------- odontograma ---------- */
@@ -1051,10 +1180,10 @@ async function saveProc(id){
 }
 function importBackup(inp){
   const f=inp.files[0];if(!f)return;const r=new FileReader();
-  r.onload=()=>{try{const d=JSON.parse(r.result);if(!confirm('Substituir os dados atuais pelo backup?'))return;S={patients:[],plans:[],budgets:[],tx:[],appts:[],procs:[],...d};persistLocal();render();toast('Backup restaurado.');}catch(e){toast('Arquivo inválido.',true);}};
+  r.onload=()=>{try{const d=JSON.parse(r.result);if(!confirm('Substituir os dados atuais pelo backup?'))return;S={patients:[],plans:[],budgets:[],tx:[],appts:[],procs:[],attachments:[],...d};persistLocal();render();toast('Backup restaurado.');}catch(e){toast('Arquivo inválido.',true);}};
   r.readAsText(f);
 }
-function wipeLocal(){if(!confirm('Apagar todos os dados salvos neste aparelho? Isso não pode ser desfeito.'))return;S={patients:[],plans:[],budgets:[],tx:[],appts:[],procs:[]};persistLocal();seedProcsIfEmpty().then(()=>{render();toast('Dados apagados.');});}
+function wipeLocal(){if(!confirm('Apagar todos os dados salvos neste aparelho? Isso não pode ser desfeito.'))return;S={patients:[],plans:[],budgets:[],tx:[],appts:[],procs:[],attachments:[]};persistLocal();seedProcsIfEmpty().then(()=>{render();toast('Dados apagados.');});}
 async function seedDemo(){
   if(!confirm('Adicionar pacientes, agenda e lançamentos de exemplo?'))return;
   const mm=today().slice(5,7);
